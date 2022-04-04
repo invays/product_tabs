@@ -1,0 +1,57 @@
+<h3>Test</h3>
+<script>
+  function visovfunction(tab_id){
+    $.ajax({
+        url: `index.php?route=extension/module/product_tabs/get_id_tab&tab_id=${tab_id}`,
+        type: 'GET',
+        dataType: 'html',
+        success: function(html) {
+            var tab_id_content = document.getElementById(`tab-tabs${tab_id}`);
+            tab_id_content.innerHTML = html;
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });	
+  }
+</script>
+
+<ul class="nav nav-tabs">
+  {% for module_tab in module_tabs %}
+    {% if loop.index == 1 %}
+      {{ module_tab.tab_sort }}
+      <li class="active"><a href="#tab-tabs{{ module_tab.tab_id }}" data-toggle="tab">{{ module_tab.tab_name[language_id]['name'] }}</a></li>
+    {% else %}
+      {{ module_tab.tab_sort }}
+      <li><a href="#tab-tabs{{ module_tab.tab_id }}" data-toggle="tab">{{ module_tab.tab_name[language_id]['name'] }}</a></li>
+    {% endif %}
+  {% endfor %}
+</ul>
+<div class="tab-content">
+  {% for module_tab in module_tabs %}
+    {% if loop.index == 1 %}
+      <div id="tab-tabs{{ module_tab.tab_id }}" class="tab-pane active">
+        <script>visovfunction('{{ module_tab.tab_id }}');</script>
+      </div>
+    {% else %}
+      <div id="tab-tabs{{ module_tab.tab_id }}" class="tab-pane">
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+<script>
+{# $(function(){
+  var hash = window.location.hash;
+  hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+  $('.nav-tabs a').click(function (e) {
+    var get_module_id = this.hash;
+    visovfunction(get_module_id.replace(/[^0-9]/g,""));
+  });
+}); #}
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+  var target = $(e.target).attr("href") // activated tab
+  var get_module_id = target;
+  visovfunction(get_module_id.replace(/[^0-9]/g,""));
+});
+</script>

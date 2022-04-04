@@ -1,0 +1,279 @@
+{% if tab.tab_childrens %}
+    {% set forms_data = children.tab_forms %}
+    {% set forms_tab_name = children.tab_name %}
+{% else %}
+    {% set forms_data = tab.tab_forms %}
+    {% set forms_tab_name = tab.tab_name %}
+{% endif %}
+{# {% for data_key, data_value in forms_data %}
+    {{ data_key }}
+{% endfor  %} #}
+{% for data_key, data_value in forms_data %}
+    {% if data_value.tab == forms_tab_name %}
+        {% if data_value.type == 'select' %}
+            {% if data_value.options is empty %}
+                <div class="form-group">
+                    <label class="col-sm-4 control-label" for="input-{{ data_key|replace({'_': '-'}) }}">
+                        <span data-toggle="tooltip" title="{{ _context[help ~ data_key] }}">
+                            {{ _context[entry ~ data_key] }}
+                        </span>
+                    </label>
+                    <div class="col-sm-8">
+                        <select name="{{ module_name }}{{ data_key }}"
+                            id="input-{{ data_key|replace({'_': '-'}) }}" class="form-control">
+                            {% if _context[module_name ~ data_key ] %}
+                                <option value="1" selected="selected">{{ text_enabled }}</option>
+                                <option value="0">{{ text_disabled }}</option>
+                            {% else %}
+                                <option value="1">{{ text_enabled }}</option>
+                                <option value="0" selected="selected">{{ text_disabled }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label class="col-sm-4 control-label" for="input-{{ data_key|replace({'_': '-'}) }}">
+                        <span data-toggle="tooltip" title="{{ _context[help ~ data_key] }}">
+                            {{ _context[entry ~ data_key] }}
+                        </span>
+                    </label>
+                    <div class="col-sm-8">
+                        <select name="{{ module_name }}{{ data_key }}"
+                            id="input-{{ data_key|replace({'_': '-'}) }}" class="form-control">
+                            {% for option_key, option_value in data_value.options %}
+                                {% if option_key == _context[module_name ~ data_key] %}
+                                    <option value="{{ option_key }}" selected="selected">
+                                        {{ option_value }}</option>
+                                {% else %}
+                                    <option value="{{ option_key }}">{{
+                                        option_value }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            {% endif %}
+        {% elseif data_value.type == 'text_input' %}
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="input-{{ data_key|replace({'_': '-'}) }}"><span
+                        data-toggle="tooltip" title="{{ _context[help ~ data_key] }}">
+                        {{ _context[entry ~ data_key] }}
+                </span></label>
+                <div class="col-sm-8">
+                    <input type="text" name="{{ module_name }}{{ data_key }}"
+                        value="{{ _context[module_name ~ data_key ] }}"
+                        placeholder="{{ _context[entry ~ data_key] }}" id="input-{{ data_key|replace({'_': '-'}) }}"
+                        class="form-control" />
+                </div>
+            </div>
+        {% elseif data_value.type == 'radio' %}
+            <div class="form-group">
+                <label class="col-sm-4 control-label">
+                    {{ _context[entry ~ data_key] }}
+                </label>
+                <div class="col-sm-8">
+                    <label class="radio-inline">
+                        {% if _context[module_name ~ data_key ] %}
+                        <input type="radio" name="{{ module_name }}{{ data_key }}" value="1"
+                            checked="checked" />
+                        {{ text_yes }}
+                        {% else %}
+                        <input type="radio" name="{{ module_name }}{{ data_key }}" value="1" />
+                        {{ text_yes }}
+                        {% endif %}
+                    </label>
+                    <label class="radio-inline">
+                        {% if not _context[module_name ~ data_key ] %}
+                        <input type="radio" name="{{ module_name }}{{ data_key }}" value="0"
+                            checked="checked" />
+                        {{ text_no }}
+                        {% else %}
+                        <input type="radio" name="{{ module_name }}{{ data_key }}" value="0" />
+                        {{ text_no }}
+                        {% endif %}
+                    </label>
+                </div>
+            </div>
+        {% elseif data_value.type == 'text_view' %}
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="input-{{ data_key|replace({'_': '-'}) }}"><span
+                        data-toggle="tooltip" title="{{ _context[help ~ data_key] }}">
+                        {{ _context[entry ~ data_key] }}
+                </span></label>
+                <div class="col-sm-8">
+                    <input type="text" name="{{ module_name }}{{ data_key }}"
+                        value="{{ data_value.link }}"
+                        id="input-{{ data_key|replace({'_': '-'}) }}"
+                        class="form-control" readonly="readonly" />
+                </div>
+            </div>
+        {% elseif data_value.type == 'custom' %}
+            {% if data_key == 'name_title' %}
+                <div class="form-group">
+                    <label class="col-sm-4 control-label" for="input-{{ data_key|replace({'_': '-'}) }}">
+                        {{ _context[entry ~ data_key] }}
+                    </label>
+                    <div class="col-sm-8">
+                        {% for lang in languages %}
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <img src="language/{{ lang.code }}/{{ lang.code }}.png" title="{{ lang.name }}" />
+                                </span>
+                                <input type="text" name="{{ module_name }}{{ data_key }}[{{ lang.language_id }}]" value="{{ _context[module_name ~ data_key][lang.language_id] }}"
+                                    class="form-control" id="input-{{ data_key|replace({'_': '-'}) }}" />
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% elseif data_key == 'tabs' %}
+                <div class="table-responsive">
+                    <table id="tabs" class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <td class="text-left">Tab name</td>
+                                <td class="text-left">Tab sort</td>
+                                <td class="text-left">Tab limit</td>
+                                <td class="text-left">Tab source</td>
+                                <td class="text-left">Tab custom</td>
+                                <td class="text-left">Tab status</td>
+                                <td>Action</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set module_tab_row = 0 %}
+                            {% for module_tab in  _context[module_name ~ data_key] %}
+                            <tr id="module-tab-row{{ module_tab_row }}">
+                                <td class="text-left">
+                                    {% for language in languages %}
+                                        <div class="input-group"><span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                                            <input type="text" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][tab_name][{{ language.language_id }}][name]" rows="5" placeholder="{{ entry_text }}" class="form-control" value="{{ module_tab.tab_name[language.language_id]['name'] }}">{# ? module_name['tab_name'][language.language_id][name].text #}
+                                            {# {{ dump(module_tab.tab_name[language.language_id]['name']) }} #}
+                                        </div>
+                                    {% endfor %}
+                                    <input type="hidden" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][tab_id]" value="{{ module_tab.tab_id }}" />
+                                    {# <input type="text" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][name]" value="{{ module_tab.name }}" placeholder="{{ entry_attribute }}" class="form-control" /> #}
+                                    {# <input type="hidden" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][tab_id]" value="{{ module_tab.tab_id }}" /> #}
+                                </td>
+                                <td class="text-left"><input type="number" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][tab_sort]" value="{{ module_tab.tab_sort }}" /></td>
+                                <td class="text-left"><input type="number" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][tab_limit]" value="{{ module_tab.tab_limit }}" /></td>
+                                <td class="text-left"><select name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][tab_source]">
+                                    {% for key,value in module_tab_option %}
+                                        {% if key == module_tab.tab_source %}
+                                            <option value="{{ key }}" selected >{{ value }}</option>
+                                        {% else %}
+                                            <option value="{{ key }}">{{ value }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select></td>
+                                <td class="text-left"><div class="col-sm-10">
+                                <input type="text" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][module_custom_product]" value="" placeholder="" id="input-product" class="form-control" />
+                                    <div id="module-custom-product-list-{{ module_tab_row }}" class="well well-sm" style="height: 150px; overflow: auto;">
+                                        {% for key, value in module_tab.module_custom_product %}
+                                            <div id="module-custom-product-set-{{ key }}-list-{{ module_tab_row }}"><i class="fa fa-minus-circle" onclick="deleteProduct('module-custom-product-list-{{ module_tab_row }}');"></i> {{ value }}
+                                                <input type="hidden" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][module_custom_product][{{ key }}]" value="{{ value }}" />
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div></td>
+                                <td class="text-left"><select name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][tab_status]">
+                                    {% if module_tab.tab_status == '1' %}
+                                        <option value="1" selected >On</option>
+                                        <option value="0">OFF</option>
+                                    {% else %}
+                                        <option value="1">On</option>
+                                        <option value="0" selected>OFF</option>
+                                    {% endif %}
+                                </select></td>
+                                <td class="text-right"><button type="button" onclick="$('#module-tab-row{{ module_tab_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                            </tr>
+                            {% set module_tab_row = module_tab_row + 1 %}
+                            {% endfor %}
+                        </tbody>
+                        
+                        <tfoot>
+                            <tr>
+                            <td colspan="6"></td>
+                            <td class="text-right"><button type="button" onclick="addAttribute();" data-toggle="tooltip" title="{{ button_attribute_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <script>
+                        var module_tab_row = {{ module_tab_row }};
+
+                        function addAttribute() {
+                            html  = '<tr id="module-tab-row' + module_tab_row + '">';
+                            html += '  <td class="text-left">';
+                                {% for language in languages %}
+                                    html += '<div class="input-group"><span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>';
+                                    html += '   <input type="text" name="{{ module_name }}{{ data_key }}[' + module_tab_row + '][tab_name][{{ language.language_id }}][name]" value="" placeholder="{{ entry_attribute }}" class="form-control" />';
+                                    html += '</div>';
+                                {% endfor %}
+                                html += '<input type="hidden" name="{{ module_name }}{{ data_key }}[' + module_tab_row + '][tab_id]" value="' + module_tab_row + '" />';
+                            html += '</td>';
+                            html += '<td class="text-left"><input type="number" name="{{ module_name }}{{ data_key }}[' + module_tab_row + '][tab_sort]" value="" /></td>';
+                            html += '<td class="text-left"><input type="number" name="{{ module_name }}{{ data_key }}[' + module_tab_row + '][tab_limit]" value="" /></td>';
+                            html += '<td class="text-left"><select name="{{ module_name }}{{ data_key }}[' + module_tab_row + '][tab_source]">';
+                                {% for key,value in module_tab_option %}
+                                    html += '<option value="{{ key }}">{{ value }}</option>';
+                                {% endfor %}
+                            html += '</select></td>';
+                            html += '<td class="text-left"><div class="col-sm-10">';
+					            html += '<input type="text" name="{{ module_name }}{{ data_key }}[' + module_tab_row + '][module_custom_product]" value="" placeholder="" id="input-module-custom-product" class="form-control" />';
+					            html += '<div id="module-custom-product-list-' + module_tab_row + '" class="well well-sm" style="height: 150px; overflow: auto;">';
+                                html += '</div>';
+				            html += '</div></td>';
+                             html += '<td class="text-left"><select name="{{ module_name }}{{ data_key }}[' + module_tab_row + '][tab_status]">';
+                                html += '<option value="1" selected >On</option>';
+                                html += '<option value="0">Off</option>';
+                            html += '</select></td>';
+                            html += '  <td class="text-right"><button type="button" onclick="$(\'#module-tab-row' + module_tab_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+                            html += '</tr>';
+
+                            $('#tabs tbody').append(html);
+
+                            attributeautocomplete(module_tab_row);
+
+                            module_tab_row++;
+                        }
+
+                        function attributeautocomplete(module_tab_row) {
+                            $(`input[name=\'{{ module_name }}{{ data_key }}[${module_tab_row}][module_custom_product]\']`).autocomplete({
+                                'source': function(request, response) {
+                                    $.ajax({
+                                        url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+                                        dataType: 'json',
+                                        success: function (json) {
+                                            response($.map(json, function (item) {
+                                                return {
+                                                    label: item["name"],
+                                                    value: item["product_id"]
+                                                }
+                                            }));
+                                        }
+                                    });
+                                },
+                                'select': function(item) {
+                                    $(`input[name=\'{{ module_name }}{{ data_key }}[${module_tab_row}][module_custom_product]\']`).val("");
+                                    $(`#module-custom-product-set-${item["value"]}-list-${module_tab_row}`).remove();
+                                    $(`#module-custom-product-list-${module_tab_row}`).append(`<div id="module-custom-product-set-${item["value"]}-list-${module_tab_row}"><i class="fa fa-minus-circle" onclick="deleteProduct('module-custom-product-list-${module_tab_row}');"></i> ${item["label"]}<input type="hidden" name="{{ module_name }}{{ data_key }}[${module_tab_row}][module_custom_product][${item["value"]}]" value="${item["label"]}" /></div>`);
+                                }
+                            });
+                        }
+
+                        function deleteProduct(autocomplete_field){
+                            $(`#${autocomplete_field}`).delegate(".fa-minus-circle", "click", function () {
+                                $(this).parent().remove();
+                            });
+                        }
+
+                        $('#tabs tbody tr').each(function(index, element) {
+                            attributeautocomplete(index);
+                        });
+
+                    </script>
+                </div>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endfor %}

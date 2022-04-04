@@ -1,0 +1,86 @@
+{{ header }}{{ column_left }}
+<div id="content">
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="pull-right">
+				<button type="submit" form="form-{{ form_name|replace({'_': '-'}) }}" data-toggle="tooltip"
+					title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i
+						class="fa fa-reply"></i></a>
+			</div>
+			<h1>{{ heading_title }}</h1>
+			<ul class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %}
+				<li><a href="{{ breadcrumb['href'] }}">{{ breadcrumb['text'] }}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="container-fluid">
+		{% if (error_warning) %}
+		<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
+		{% endif %}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+			</div>
+			<div class="panel-body">
+				<form action="{{ action }}" method="POST" enctype="multipart/form-data"
+					id="form-{{ form_name|replace({'_': '-'}) }}" class="form-horizontal">
+					<ul class="nav nav-tabs">
+						{% for tab in module_datas %}
+							{% if tab.tab_name == 'tab_general' %}
+								<li class="active"><a href="#{{ tab.tab_name|replace({'_': '-'}) }}" data-toggle="tab">{{ _context[text ~ tab.tab_name] }}</a></li>
+							{% else %}
+								<li><a href="#{{ tab.tab_name|replace({'_': '-'}) }}" data-toggle="tab">{{ _context[text ~ tab.tab_name] }}</a></li>
+							{% endif %}
+						{% endfor %}
+					</ul>
+					<div class="tab-content">
+						{% for tab in module_datas %}
+							{% if tab.tab_priority == 1 %}
+								<div id="{{ tab.tab_name|replace({'_': '-'}) }}" class="tab-pane active">
+									{% include template.forms %}
+								</div>
+							{% else %}
+								{% if tab.tab_childrens %}
+									<div id="{{ tab.tab_name|replace({'_': '-'}) }}" class="tab-pane">
+										<ul class="nav nav-tabs">
+											{% for children in tab.tab_childrens %}
+												{% if children.tab_priority == 1 %}
+													<li class="active"><a href="#{{ children.tab_name|replace({'_': '-'}) }}" data-toggle="tab">{{ _context[text ~ children.tab_name] }}</a></li>
+												{% else %}
+													<li><a href="#{{ children.tab_name|replace({'_': '-'}) }}" data-toggle="tab">{{ _context[text ~ children.tab_name] }}</a></li>
+												{% endif %}
+											{% endfor %}
+										</ul>
+										<div class="tab-content">
+											{% for children in tab.tab_childrens %}
+												{% if children.tab_priority == 1 %}
+													<div id="{{ children.tab_name|replace({'_': '-'}) }}" class="tab-pane active">
+														{% include template.forms %}
+													</div>
+												{% else %}
+													<div id="{{ children.tab_name|replace({'_': '-'}) }}" class="tab-pane">
+														{% include template.forms %}
+													</div>
+												{% endif %}
+											{% endfor %}
+										</div>
+									</div>
+								{% else %}
+									<div id="{{ tab.tab_name|replace({'_': '-'}) }}" class="tab-pane">
+										{% include template.forms %}
+									</div>
+								{% endif %}
+							{% endif %}
+						{% endfor %}
+					</div> <!-- end tabs content -->
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{{ footer }}
