@@ -89,7 +89,7 @@ class ControllerExtensionModuleProductTabs extends Controller {
 			$this->load->language($this->module_path);
 
 			/* Load models */
-			$this->load->model($this->module_path);
+			/* $this->load->model($this->module_path); */
 			$this->load->model('localisation/language');
 			$this->load->model('setting/setting');
 			$this->load->model('setting/event');
@@ -120,7 +120,7 @@ class ControllerExtensionModuleProductTabs extends Controller {
 	}
 
 	public function index(): void {
-		/* try { */
+		try {
 			$this->document->setTitle($this->language->get('heading_title'));
 
 			if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
@@ -202,9 +202,9 @@ class ControllerExtensionModuleProductTabs extends Controller {
 			$data['footer'] 		= $this->load->controller('common/footer');
 
 			$this->response->setOutput($this->load->view("{$this->module_template_path}", $data));
-		/* } catch (Throwable $error) {
+		} catch (Throwable $error) {
 			$this->log->write($error->getMessage());
-		} */
+		}
 	}
 
 	/* public function install(): void {
