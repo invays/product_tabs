@@ -136,6 +136,7 @@
                                 <td class="text-left">Tab limit</td>
                                 <td class="text-left">Tab source</td>
                                 <td class="text-left">Tab custom</td>
+                                <td class="text-left">Tab category</td>
                                 <td class="text-left">Tab status</td>
                                 <td>Action</td>
                             </tr>
@@ -167,15 +168,27 @@
                                     {% endfor %}
                                 </select></td>
                                 <td class="text-left"><div class="col-sm-10">
-                                <input type="text" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][module_custom_product]" value="" placeholder="" id="input-product" class="form-control" />
-                                    <div id="module-custom-product-list-{{ module_tab_row }}" class="well well-sm" style="height: 150px; overflow: auto;">
-                                        {% for key, value in module_tab.module_custom_product %}
-                                            <div id="module-custom-product-set-{{ key }}-list-{{ module_tab_row }}"><i class="fa fa-minus-circle" onclick="deleteProduct('module-custom-product-list-{{ module_tab_row }}');"></i> {{ value }}
-                                                <input type="hidden" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][module_custom_product][{{ key }}]" value="{{ value }}" />
-                                            </div>
-                                        {% endfor %}
+                                    <input type="text" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][module_custom_product]" value="" placeholder="" id="input-module-custom-product" class="form-control" />
+                                        <div id="module-custom-product-list-{{ module_tab_row }}" class="well well-sm" style="height: 150px; overflow: auto;">
+                                            {% for key, value in module_tab.module_custom_product %}
+                                                <div id="module-custom-product-set-{{ key }}-list-{{ module_tab_row }}"><i class="fa fa-minus-circle" onclick="deleteProduct('module-custom-product-list-{{ module_tab_row }}');"></i> {{ value }}
+                                                    <input type="hidden" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][module_custom_product][{{ key }}]" value="{{ value }}" />
+                                                </div>
+                                            {% endfor %}
+                                        </div>
                                     </div>
-                                </div></td>
+                                </td>
+                                <td class="text-left"><div class="col-sm-10">
+                                    <input type="text" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][module_custom_category]" value="" placeholder="" id="input-module-custom-category" class="form-control" />
+                                        <div id="module-custom-category-list-{{ module_tab_row }}" class="well well-sm" style="height: 150px; overflow: auto;">
+                                            {% for key, value in module_tab.module_custom_category %}
+                                                <div id="module-custom-category-set-{{ key }}-list-{{ module_tab_row }}"><i class="fa fa-minus-circle" onclick="deleteCategory('module-custom-category-list-{{ module_tab_row }}');"></i> {{ value }}
+                                                    <input type="hidden" name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][module_custom_category][{{ key }}]" value="{{ value }}" />
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </td>
                                 <td class="text-left"><select name="{{ module_name }}{{ data_key }}[{{ module_tab_row }}][tab_status]">
                                     {% if module_tab.tab_status == '1' %}
                                         <option value="1" selected >On</option>
@@ -193,7 +206,7 @@
                         
                         <tfoot>
                             <tr>
-                            <td colspan="6"></td>
+                            <td colspan="7"></td>
                             <td class="text-right"><button type="button" onclick="addAttribute();" data-toggle="tooltip" title="{{ button_attribute_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
                             </tr>
                         </tfoot>
@@ -223,6 +236,11 @@
 					            html += '<div id="module-custom-product-list-' + module_tab_row + '" class="well well-sm" style="height: 150px; overflow: auto;">';
                                 html += '</div>';
 				            html += '</div></td>';
+                            html += '<td class="text-left"><div class="col-sm-10">';
+					            html += '<input type="text" name="{{ module_name }}{{ data_key }}[' + module_tab_row + '][module_custom_category]" value="" placeholder="" id="input-module-custom-category" class="form-control" />';
+					            html += '<div id="module-custom-category-list-' + module_tab_row + '" class="well well-sm" style="height: 150px; overflow: auto;">';
+                                html += '</div>';
+				            html += '</div></td>';
                              html += '<td class="text-left"><select name="{{ module_name }}{{ data_key }}[' + module_tab_row + '][tab_status]">';
                                 html += '<option value="1" selected >On</option>';
                                 html += '<option value="0">Off</option>';
@@ -233,6 +251,7 @@
                             $('#tabs tbody').append(html);
 
                             attributeautocomplete(module_tab_row);
+                            categoryautocomplete(module_tab_row);
 
                             module_tab_row++;
                         }
@@ -261,7 +280,37 @@
                             });
                         }
 
+                        function categoryautocomplete(module_tab_row) {
+                            $(`input[name=\'{{ module_name }}{{ data_key }}[${module_tab_row}][module_custom_category]\']`).autocomplete({
+                                'source': function(request, response) {
+                                    $.ajax({
+                                        url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+                                        dataType: 'json',
+                                        success: function (json) {
+                                            response($.map(json, function (item) {
+                                                return {
+                                                    label: item["name"],
+                                                    value: item["category_id"]
+                                                }
+                                            }));
+                                        }
+                                    });
+                                },
+                                'select': function(item) {
+                                    $(`input[name=\'{{ module_name }}{{ data_key }}[${module_tab_row}][module_custom_category]\']`).val("");
+                                    $(`#module-custom-category-set-${item["value"]}-list-${module_tab_row}`).remove();
+                                    $(`#module-custom-category-list-${module_tab_row}`).append(`<div id="module-custom-category-set-${item["value"]}-list-${module_tab_row}"><i class="fa fa-minus-circle" onclick="deleteCategory('module-custom-category-list-${module_tab_row}');"></i> ${item["label"]}<input type="hidden" name="{{ module_name }}{{ data_key }}[${module_tab_row}][module_custom_category][${item["value"]}]" value="${item["label"]}" /></div>`);
+                                }
+                            });
+                        }
+
                         function deleteProduct(autocomplete_field){
+                            $(`#${autocomplete_field}`).delegate(".fa-minus-circle", "click", function () {
+                                $(this).parent().remove();
+                            });
+                        }
+
+                        function deleteCategory(autocomplete_field){
                             $(`#${autocomplete_field}`).delegate(".fa-minus-circle", "click", function () {
                                 $(this).parent().remove();
                             });
@@ -269,6 +318,7 @@
 
                         $('#tabs tbody tr').each(function(index, element) {
                             attributeautocomplete(index);
+                            categoryautocomplete(index);
                         });
 
                     </script>

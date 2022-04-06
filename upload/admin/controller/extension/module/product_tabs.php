@@ -191,6 +191,7 @@ class ControllerExtensionModuleProductTabs extends Controller {
 				"bestseller"=>'Bestseller',
 				"special"=>'Special',
 				"viewed"=>'Viewed',
+				"category"=>'Category',
 				"custom"=>'Custom'
 			];
 

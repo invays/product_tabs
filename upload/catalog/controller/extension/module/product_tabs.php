@@ -409,7 +409,7 @@ class ControllerExtensionModuleProductTabs extends Controller{
 					}
 
 					$attribute_groups = [];
-						$data['attribute_limit'] = $this->product_attribute_limit;
+					$data['attribute_limit'] = $this->product_attribute_limit;
 				
 					foreach ($this->model_catalog_product->getProductAttributes($result['product_id']) as $attribute_group) {
 						$attributes = [];
@@ -441,6 +441,75 @@ class ControllerExtensionModuleProductTabs extends Controller{
 						'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
 					];
 				}
+				break;
+			case 'category':
+				$results = [];
+				$categories = $sort_array[$module_tab_id]['module_custom_category'];
+			
+				foreach ($categories as $category_id => $category_name) {
+
+					$filter_data = array(
+						'filter_category_id' => $category_id,
+						'filter_filter'      => [],
+						'sort'  			 => 'p.sort_order',
+						'order'  			 => 'ASC',
+						'start'              => 0,
+						'limit'              => $sort_array[$module_tab_id]['tab_limit']
+					);
+
+					
+	
+					$products_result = $this->model_catalog_product->getProducts($filter_data);
+					foreach ($products_result as $products_result) {
+						$results[] = $products_result;
+					}
+				}
+
+				foreach ($results as $result) {
+					if ($result['image']) {
+						$image = $this->model_tool_image->resize($result['image'], $this->image_width, $this->image_height);
+					} else {
+						$image = $this->model_tool_image->resize('placeholder.png', $this->image_width, $this->image_height);
+					}
+	
+					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+						$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					} else {
+						$price = false;
+					}
+	
+					if ((float)$result['special']) {
+						$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					} else {
+						$special = false;
+					}
+	
+					if ($this->config->get('config_tax')) {
+						$tax = $this->currency->format((float)$result['special'] ? $result['special'] : $result['price'], $this->session->data['currency']);
+					} else {
+						$tax = false;
+					}
+	
+					if ($this->config->get('config_review_status')) {
+						$rating = (int)$result['rating'];
+					} else {
+						$rating = false;
+					}
+	
+					$data['products'][] = array(
+						'product_id'  => $result['product_id'],
+						'thumb'       => $image,
+						'name'        => $result['name'],
+						'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->product_description_limit) . '..',
+						'price'       => $price,
+						'special'     => $special,
+						'tax'         => $tax,
+						'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
+						'rating'      => $result['rating'],
+						'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
+					);
+				}
+
 				break;
 			default:
 				$filter_data = array(
